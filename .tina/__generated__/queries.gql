@@ -1,232 +1,51 @@
-query getLocaleInfoDocument($relativePath: String!) {
-  getLocaleInfoDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
-    }
-    id
-    data {
-      ...LocaleInfoParts
-    }
-  }
-}
-
-query getLocaleInfoList {
-  getLocaleInfoList {
-    totalCount
-    edges {
-      node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
-        }
-        data {
-          ...LocaleInfoParts
-        }
+query post($relativePath: String!) {
+  post(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        breadcrumbs
+        path
+        relativePath
+        extension
       }
+      id
     }
+    ...PostParts
   }
 }
 
-query getNewsDocument($relativePath: String!) {
-  getNewsDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
+query postConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: PostFilter) {
+  postConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
     }
-    id
-    data {
-      ...NewsParts
-    }
-  }
-}
-
-query getNewsList {
-  getNewsList {
     totalCount
     edges {
+      cursor
       node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
+        ... on Document {
+          _sys {
+            filename
+            basename
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
         }
-        data {
-          ...NewsParts
-        }
-      }
-    }
-  }
-}
-
-query getFooterDocument($relativePath: String!) {
-  getFooterDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
-    }
-    id
-    data {
-      ...FooterParts
-    }
-  }
-}
-
-query getFooterList {
-  getFooterList {
-    totalCount
-    edges {
-      node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
-        }
-        data {
-          ...FooterParts
-        }
-      }
-    }
-  }
-}
-
-query getThemeDocument($relativePath: String!) {
-  getThemeDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
-    }
-    id
-    data {
-      ...ThemeParts
-    }
-  }
-}
-
-query getThemeList {
-  getThemeList {
-    totalCount
-    edges {
-      node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
-        }
-        data {
-          ...ThemeParts
-        }
-      }
-    }
-  }
-}
-
-query getNavigationDocument($relativePath: String!) {
-  getNavigationDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
-    }
-    id
-    data {
-      ...NavigationParts
-    }
-  }
-}
-
-query getNavigationList {
-  getNavigationList {
-    totalCount
-    edges {
-      node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
-        }
-        data {
-          ...NavigationParts
-        }
-      }
-    }
-  }
-}
-
-query getPageDocument($relativePath: String!) {
-  getPageDocument(relativePath: $relativePath) {
-    sys {
-      filename
-      basename
-      breadcrumbs
-      path
-      relativePath
-      extension
-    }
-    id
-    data {
-      ...PageParts
-    }
-  }
-}
-
-query getPageList {
-  getPageList {
-    totalCount
-    edges {
-      node {
-        id
-        sys {
-          filename
-          basename
-          breadcrumbs
-          path
-          relativePath
-          extension
-        }
-        data {
-          ...PageParts
-        }
+        ...PostParts
       }
     }
   }

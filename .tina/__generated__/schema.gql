@@ -7,6 +7,7 @@ scalar JSON
 
 type SystemInfo {
   filename: String!
+  title: String
   basename: String!
   breadcrumbs(excludeExtension: Boolean): [String!]!
   path: String!
@@ -30,46 +31,38 @@ interface Node {
 
 """"""
 interface Document {
-  sys: SystemInfo
   id: ID!
-  form: JSON!
-  values: JSON!
+  _sys: SystemInfo
+  _values: JSON!
 }
 
 """A relay-compliant pagination connection"""
 interface Connection {
   totalCount: Float!
+  pageInfo: PageInfo!
 }
 
 type Query {
   getOptimizedQuery(queryString: String!): String
-  getCollection(collection: String): Collection!
-  getCollections: [Collection!]!
+  collection(collection: String): Collection!
+  collections: [Collection!]!
   node(id: String): Node!
-  getDocument(collection: String, relativePath: String): DocumentNode!
-  getDocumentList(before: String, after: String, first: Float, last: Float): DocumentConnection!
-  getDocumentFields: JSON!
-  getLocaleInfoDocument(relativePath: String): LocaleInfoDocument!
-  getLocaleInfoList(before: String, after: String, first: Float, last: Float): LocaleInfoConnection!
-  getNewsDocument(relativePath: String): NewsDocument!
-  getNewsList(before: String, after: String, first: Float, last: Float): NewsConnection!
-  getFooterDocument(relativePath: String): FooterDocument!
-  getFooterList(before: String, after: String, first: Float, last: Float): FooterConnection!
-  getThemeDocument(relativePath: String): ThemeDocument!
-  getThemeList(before: String, after: String, first: Float, last: Float): ThemeConnection!
-  getNavigationDocument(relativePath: String): NavigationDocument!
-  getNavigationList(before: String, after: String, first: Float, last: Float): NavigationConnection!
-  getPageDocument(relativePath: String): PageDocument!
-  getPageList(before: String, after: String, first: Float, last: Float): PageConnection!
+  document(collection: String, relativePath: String): DocumentNode!
+  post(relativePath: String): Post!
+  postConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PostFilter): PostConnection!
+}
+
+input DocumentFilter {
+  post: PostFilter
 }
 
 type DocumentConnectionEdges {
-  cursor: String
+  cursor: String!
   node: DocumentNode
 }
 
 type DocumentConnection implements Connection {
-  pageInfo: PageInfo
+  pageInfo: PageInfo!
   totalCount: Float!
   edges: [DocumentConnectionEdges]
 }
@@ -83,676 +76,72 @@ type Collection {
   matches: String
   templates: [JSON]
   fields: [JSON]
-  documents(before: String, after: String, first: Float, last: Float): DocumentConnection!
+  documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter): DocumentConnection!
 }
 
-union DocumentNode = LocaleInfoDocument | NewsDocument | FooterDocument | ThemeDocument | NavigationDocument | PageDocument
+union DocumentNode = Post
 
-type LocaleInfoAu {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-type LocaleInfoUs {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-type LocaleInfoGb {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-type LocaleInfo {
-  au: LocaleInfoAu
-  us: LocaleInfoUs
-  gb: LocaleInfoGb
-}
-
-type LocaleInfoDocument implements Node & Document {
+type Post implements Node & Document {
+  title: String!
+  body: JSON
   id: ID!
-  sys: SystemInfo!
-  data: LocaleInfo!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
+  _sys: SystemInfo!
+  _values: JSON!
 }
 
-type LocaleInfoConnectionEdges {
-  cursor: String
-  node: LocaleInfoDocument
+input StringFilter {
+  startsWith: String
+  eq: String
+  exists: Boolean
+  in: [String]
 }
 
-type LocaleInfoConnection implements Connection {
-  pageInfo: PageInfo
+input RichTextFilter {
+  startsWith: String
+  eq: String
+  exists: Boolean
+}
+
+input PostFilter {
+  title: StringFilter
+  body: RichTextFilter
+}
+
+type PostConnectionEdges {
+  cursor: String!
+  node: Post
+}
+
+type PostConnection implements Connection {
+  pageInfo: PageInfo!
   totalCount: Float!
-  edges: [LocaleInfoConnectionEdges]
-}
-
-type News {
-  title: String!
-  subTitle: String
-  description: String!
-  image: String
-  body: String
-}
-
-type NewsDocument implements Node & Document {
-  id: ID!
-  sys: SystemInfo!
-  data: News!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
-}
-
-type NewsConnectionEdges {
-  cursor: String
-  node: NewsDocument
-}
-
-type NewsConnection implements Connection {
-  pageInfo: PageInfo
-  totalCount: Float!
-  edges: [NewsConnectionEdges]
-}
-
-type FooterOffices {
-  location: String!
-  address: String!
-  phone: String!
-}
-
-type FooterDisclaimers {
-  body: String
-}
-
-type Footer {
-  offices: [FooterOffices]
-  disclaimers: [FooterDisclaimers!]!
-}
-
-type FooterDocument implements Node & Document {
-  id: ID!
-  sys: SystemInfo!
-  data: Footer!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
-}
-
-type FooterConnectionEdges {
-  cursor: String
-  node: FooterDocument
-}
-
-type FooterConnection implements Connection {
-  pageInfo: PageInfo
-  totalCount: Float!
-  edges: [FooterConnectionEdges]
-}
-
-type Theme {
-  displayFont: String
-  colorMode: String
-}
-
-type ThemeDocument implements Node & Document {
-  id: ID!
-  sys: SystemInfo!
-  data: Theme!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
-}
-
-type ThemeConnectionEdges {
-  cursor: String
-  node: ThemeDocument
-}
-
-type ThemeConnection implements Connection {
-  pageInfo: PageInfo
-  totalCount: Float!
-  edges: [ThemeConnectionEdges]
-}
-
-union NavigationItemsPageDocument = PageDocument
-
-type NavigationItems {
-  page: NavigationItemsPageDocument
-}
-
-type Navigation {
-  items: [NavigationItems!]!
-}
-
-type NavigationDocument implements Node & Document {
-  id: ID!
-  sys: SystemInfo!
-  data: Navigation!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
-}
-
-type NavigationConnectionEdges {
-  cursor: String
-  node: NavigationDocument
-}
-
-type NavigationConnection implements Connection {
-  pageInfo: PageInfo
-  totalCount: Float!
-  edges: [NavigationConnectionEdges]
-}
-
-type PageSeo {
-  title: String
-  image: String
-  description: String!
-}
-
-union PageBlocksNewsNewsItemsArticleDocument = NewsDocument
-
-type PageBlocksNewsNewsItems {
-  article: PageBlocksNewsNewsItemsArticleDocument!
-}
-
-type PageBlocksNews {
-  title: String!
-  subTitle: String
-  description: String!
-  newsItems: [PageBlocksNewsNewsItems!]!
-}
-
-type PageBlocksStatsWithImageStats {
-  title: String!
-  subTitle: String
-  description: String!
-}
-
-type PageBlocksStatsWithImage {
-  title: String!
-  subTitle: String
-  description: String!
-  image: String
-  stats: [PageBlocksStatsWithImageStats!]!
-}
-
-type PageBlocksHeroAction {
-  callToAction: String
-  linkText: String!
-  link: String!
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-type PageBlocksHero {
-  title: String!
-  subTitle: String
-  description: String!
-  style: String
-  image: String
-  action: PageBlocksHeroAction
-}
-
-type PageBlocksSlideshowItemsAction {
-  callToAction: String
-  linkText: String!
-  link: String!
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-type PageBlocksSlideshowItems {
-  title: String!
-  subTitle: String
-  description: String!
-  image: String
-  textColor: String
-  action: PageBlocksSlideshowItemsAction
-  overlayColor: String
-  overlayOpacity: String
-}
-
-type PageBlocksSlideshow {
-  items: [PageBlocksSlideshowItems]
-}
-
-type PageBlocksComparisonTableItems {
-  title: String!
-  subTitle: String
-  description: String!
-  bulletPoints: [String]
-}
-
-type PageBlocksComparisonTableAction {
-  callToAction: String
-  linkText: String!
-  link: String!
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-type PageBlocksComparisonTable {
-  title: String!
-  subTitle: String
-  description: String!
-  items: [PageBlocksComparisonTableItems]
-  action: PageBlocksComparisonTableAction
-}
-
-type PageBlocksFullScreenLogo {
-  slogan: String
-  link: String
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-type PageBlocksFullScreenHeaderAction {
-  callToAction: String
-  linkText: String!
-  link: String!
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-type PageBlocksFullScreenHeader {
-  title: String!
-  subTitle: String
-  description: String!
-  action: PageBlocksFullScreenHeaderAction
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-type PageBlocksFeatureFeatures {
-  icon: String!
-  name: String!
-  description: String!
-}
-
-type PageBlocksFeature {
-  title: String!
-  subTitle: String
-  description: String!
-  featureStyle: String
-  features: [PageBlocksFeatureFeatures!]!
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-type PageBlocksScreenShotFeatureAction {
-  callToAction: String
-  linkText: String!
-  link: String!
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-type PageBlocksScreenShotFeatureTestimonialAuthor {
-  name: String!
-  avatar: String!
-}
-
-type PageBlocksScreenShotFeatureTestimonial {
-  quote: String!
-  author: PageBlocksScreenShotFeatureTestimonialAuthor
-}
-
-type PageBlocksScreenShotFeature {
-  title: String!
-  subTitle: String
-  description: String!
-  image: String
-  alignment: String
-  icon: String
-  action: PageBlocksScreenShotFeatureAction
-  testimonial: PageBlocksScreenShotFeatureTestimonial
-}
-
-union PageBlocks = PageBlocksNews | PageBlocksStatsWithImage | PageBlocksHero | PageBlocksSlideshow | PageBlocksComparisonTable | PageBlocksFullScreenLogo | PageBlocksFullScreenHeader | PageBlocksFeature | PageBlocksScreenShotFeature
-
-type Page {
-  title: String!
-  link: String!
-  seo: PageSeo
-  blocks: [PageBlocks]
-}
-
-type PageDocument implements Node & Document {
-  id: ID!
-  sys: SystemInfo!
-  data: Page!
-  form: JSON!
-  values: JSON!
-  dataJSON: JSON!
-}
-
-type PageConnectionEdges {
-  cursor: String
-  node: PageDocument
-}
-
-type PageConnection implements Connection {
-  pageInfo: PageInfo
-  totalCount: Float!
-  edges: [PageConnectionEdges]
+  edges: [PostConnectionEdges]
 }
 
 type Mutation {
   addPendingDocument(collection: String!, relativePath: String!, template: String): DocumentNode!
-  updateDocument(collection: String, relativePath: String!, params: DocumentMutation!): DocumentNode!
+  updateDocument(collection: String, relativePath: String!, params: DocumentUpdateMutation!): DocumentNode!
+  deleteDocument(collection: String, relativePath: String!): DocumentNode!
   createDocument(collection: String, relativePath: String!, params: DocumentMutation!): DocumentNode!
-  updateLocaleInfoDocument(relativePath: String!, params: LocaleInfoMutation!): LocaleInfoDocument!
-  createLocaleInfoDocument(relativePath: String!, params: LocaleInfoMutation!): LocaleInfoDocument!
-  updateNewsDocument(relativePath: String!, params: NewsMutation!): NewsDocument!
-  createNewsDocument(relativePath: String!, params: NewsMutation!): NewsDocument!
-  updateFooterDocument(relativePath: String!, params: FooterMutation!): FooterDocument!
-  createFooterDocument(relativePath: String!, params: FooterMutation!): FooterDocument!
-  updateThemeDocument(relativePath: String!, params: ThemeMutation!): ThemeDocument!
-  createThemeDocument(relativePath: String!, params: ThemeMutation!): ThemeDocument!
-  updateNavigationDocument(relativePath: String!, params: NavigationMutation!): NavigationDocument!
-  createNavigationDocument(relativePath: String!, params: NavigationMutation!): NavigationDocument!
-  updatePageDocument(relativePath: String!, params: PageMutation!): PageDocument!
-  createPageDocument(relativePath: String!, params: PageMutation!): PageDocument!
+  updatePost(relativePath: String!, params: PostMutation!): Post!
+  createPost(relativePath: String!, params: PostMutation!): Post!
+}
+
+input DocumentUpdateMutation {
+  post: PostMutation
+  relativePath: String
 }
 
 input DocumentMutation {
-  localeInfo: LocaleInfoMutation
-  news: NewsMutation
-  footer: FooterMutation
-  theme: ThemeMutation
-  navigation: NavigationMutation
-  page: PageMutation
+  post: PostMutation
 }
 
-input LocaleInfoAuMutation {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-input LocaleInfoUsMutation {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-input LocaleInfoGbMutation {
-  tel: String
-  signUpLink: String
-  signUpLinkPersonal: String
-  signInLink: String
-}
-
-input LocaleInfoMutation {
-  au: LocaleInfoAuMutation
-  us: LocaleInfoUsMutation
-  gb: LocaleInfoGbMutation
-}
-
-input NewsMutation {
+input PostMutation {
   title: String
-  subTitle: String
-  description: String
-  image: String
-  body: String
-}
-
-input FooterOfficesMutation {
-  location: String
-  address: String
-  phone: String
-}
-
-input FooterDisclaimersMutation {
-  body: String
-}
-
-input FooterMutation {
-  offices: [FooterOfficesMutation]
-  disclaimers: [FooterDisclaimersMutation]
-}
-
-input ThemeMutation {
-  displayFont: String
-  colorMode: String
-}
-
-input NavigationItemsMutation {
-  page: String
-}
-
-input NavigationMutation {
-  items: [NavigationItemsMutation]
-}
-
-input PageSeoMutation {
-  title: String
-  image: String
-  description: String
-}
-
-input PageBlocksNewsNewsItemsMutation {
-  article: String
-}
-
-input PageBlocksNewsMutation {
-  title: String
-  subTitle: String
-  description: String
-  newsItems: [PageBlocksNewsNewsItemsMutation]
-}
-
-input PageBlocksStatsWithImageStatsMutation {
-  title: String
-  subTitle: String
-  description: String
-}
-
-input PageBlocksStatsWithImageMutation {
-  title: String
-  subTitle: String
-  description: String
-  image: String
-  stats: [PageBlocksStatsWithImageStatsMutation]
-}
-
-input PageBlocksHeroActionMutation {
-  callToAction: String
-  linkText: String
-  link: String
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-input PageBlocksHeroMutation {
-  title: String
-  subTitle: String
-  description: String
-  style: String
-  image: String
-  action: PageBlocksHeroActionMutation
-}
-
-input PageBlocksSlideshowItemsActionMutation {
-  callToAction: String
-  linkText: String
-  link: String
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-input PageBlocksSlideshowItemsMutation {
-  title: String
-  subTitle: String
-  description: String
-  image: String
-  textColor: String
-  action: PageBlocksSlideshowItemsActionMutation
-  overlayColor: String
-  overlayOpacity: String
-}
-
-input PageBlocksSlideshowMutation {
-  items: [PageBlocksSlideshowItemsMutation]
-}
-
-input PageBlocksComparisonTableItemsMutation {
-  title: String
-  subTitle: String
-  description: String
-  bulletPoints: [String]
-}
-
-input PageBlocksComparisonTableActionMutation {
-  callToAction: String
-  linkText: String
-  link: String
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-input PageBlocksComparisonTableMutation {
-  title: String
-  subTitle: String
-  description: String
-  items: [PageBlocksComparisonTableItemsMutation]
-  action: PageBlocksComparisonTableActionMutation
-}
-
-input PageBlocksFullScreenLogoMutation {
-  slogan: String
-  link: String
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-input PageBlocksFullScreenHeaderActionMutation {
-  callToAction: String
-  linkText: String
-  link: String
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-input PageBlocksFullScreenHeaderMutation {
-  title: String
-  subTitle: String
-  description: String
-  action: PageBlocksFullScreenHeaderActionMutation
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-input PageBlocksFeatureFeaturesMutation {
-  icon: String
-  name: String
-  description: String
-}
-
-input PageBlocksFeatureMutation {
-  title: String
-  subTitle: String
-  description: String
-  featureStyle: String
-  features: [PageBlocksFeatureFeaturesMutation]
-  image: String
-  textColor: String
-  overlayColor: String
-  overlayOpacity: String
-}
-
-input PageBlocksScreenShotFeatureActionMutation {
-  callToAction: String
-  linkText: String
-  link: String
-  linkOverride: String
-  secondaryText: String
-  secondaryLink: String
-  secondaryLinkOverride: String
-}
-
-input PageBlocksScreenShotFeatureTestimonialAuthorMutation {
-  name: String
-  avatar: String
-}
-
-input PageBlocksScreenShotFeatureTestimonialMutation {
-  quote: String
-  author: PageBlocksScreenShotFeatureTestimonialAuthorMutation
-}
-
-input PageBlocksScreenShotFeatureMutation {
-  title: String
-  subTitle: String
-  description: String
-  image: String
-  alignment: String
-  icon: String
-  action: PageBlocksScreenShotFeatureActionMutation
-  testimonial: PageBlocksScreenShotFeatureTestimonialMutation
-}
-
-input PageBlocksMutation {
-  news: PageBlocksNewsMutation
-  statsWithImage: PageBlocksStatsWithImageMutation
-  hero: PageBlocksHeroMutation
-  slideshow: PageBlocksSlideshowMutation
-  comparisonTable: PageBlocksComparisonTableMutation
-  fullScreenLogo: PageBlocksFullScreenLogoMutation
-  fullScreenHeader: PageBlocksFullScreenHeaderMutation
-  feature: PageBlocksFeatureMutation
-  screenShotFeature: PageBlocksScreenShotFeatureMutation
-}
-
-input PageMutation {
-  title: String
-  link: String
-  seo: PageSeoMutation
-  blocks: [PageBlocksMutation]
+  body: JSON
 }
 
 schema {
   query: Query
   mutation: Mutation
 }
-  
